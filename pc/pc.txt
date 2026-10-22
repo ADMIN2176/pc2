@@ -1,0 +1,251 @@
+Program 5: Write a MPI Program to demonstration of MPI_Send and MPI_Recv.
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+int rank, size;
+int number;
+MPI_Init(&argc, &argv);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (size < 2) {
+if (rank == 0) {
+printf("This program requires at least 2 processes.\n");
+}
+MPI_Finalize();
+return 0;
+}
+if (rank == 0) {
+number = 100;
+printf("Process 0 sending number %d to Process 1\n", number);
+MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+}
+else if (rank == 1)
+{
+MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+printf("Process 1 received number %d from Process 0\n", number);
+}
+MPI_Finalize();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Program 6: Write a MPI program to demonstration of deadlock using point to point communication and
+avoidance of deadlock by altering the call sequence. ( A – Deadlock)
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv)
+{
+int rank, size;
+MPI_Status status;
+long int data = 500;
+MPI_Init(NULL, NULL);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (size != 2) {
+if (rank == 0)
+printf("This program requires exactly 2 processes.\n");
+MPI_Finalize();
+return 0;
+}
+if (rank == 0) {
+MPI_Recv(&data, 1, MPI_INT, 1, 10, MPI_COMM_WORLD, &status);
+printf("Received data from process 1\n");
+MPI_Send(&data, 1, MPI_INT, 1, 10, MPI_COMM_WORLD);
+printf("Sent data to process 1\n");
+}
+else if (rank == 1) {
+MPI_Recv(&data, 1, MPI_INT, 0, 10, MPI_COMM_WORLD, &status);
+printf("Received data from process0\n");
+MPI_Send(&data, 1, MPI_INT, 0, 10, MPI_COMM_WORLD);
+printf("Sent data to process 0\n");
+}
+printf("Process %d finished communication.\n", rank);
+MPI_Finalize();
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Program 6: Write a MPI program to demonstration of deadlock using point to point communication and
+avoidance of deadlock by altering the call sequence. ( B – Avoidance)
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+int rank, size;
+MPI_Status status;
+long int data = 500;
+MPI_Init(NULL, NULL);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (size != 2) {
+if (rank == 0)
+printf("This program requires exactly 2 processes.\n");
+MPI_Finalize();
+return 0;
+}
+if (rank == 0) {
+MPI_Send(&data, 1, MPI_INT, 1, 10, MPI_COMM_WORLD);
+printf("\nSent data to process 1\n");
+MPI_Recv(&data, 1, MPI_INT, 1, 10, MPI_COMM_WORLD, &status);
+printf("Received data from process 1\n");
+}
+else if (rank == 1) {
+MPI_Send(&data, 1, MPI_INT, 0, 10, MPI_COMM_WORLD);
+printf("\nSent data to process 0\n");
+MPI_Recv(&data, 1, MPI_INT, 0, 10, MPI_COMM_WORLD, &status);
+printf("Received data from process0\n");
+}
+printf("Process %d finished communication.\n", rank);
+MPI_Finalize();
+return 0;
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+Program 7: Write a MPI Program to demonstration of Broadcast operation.
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv)
+{ int rank, size;
+int number;
+MPI_Init(&argc, &argv);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (rank == 0) {
+printf("Enter a number to broadcast: ");
+fflush(stdout);
+scanf("%d", &number);
+printf("Process %d broadcasting data = %d\n", rank, number);
+}
+printf("Process %d received number: %d\n", rank, number);
+MPI_Finalize(); return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+Program 8: Write a MPI Program demonstration of MPI_Scatter and MPI_Gather.
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+int rank, size;
+int send_data[100], recv_data, gather_data[100];
+MPI_Init(&argc, &argv);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (rank == 0) {
+for (int i = 0; i < size; i++) {
+send_data[i] = (i + 1) * 10;
+}
+printf("\nRoot process initialized data: ");
+for (int i = 0; i < size; i++) {
+printf("%d ", send_data[i]);
+}
+printf("\n");
+}
+MPI_Scatter(send_data, 1, MPI_INT, &recv_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+printf("\nProcess %d received value %d\n", rank, recv_data);
+recv_data *= 2;
+MPI_Gather(&recv_data, 1, MPI_INT, gather_data, 1, MPI_INT, 0, MPI_COMM_WORLD);
+if (rank == 0) {
+printf("\nRoot process gathered modified data: ");
+for (int i = 0; i < size; i++) {
+printf("%d ", gather_data[i]);
+}
+printf("\n");
+}
+MPI_Finalize();
+return 0;
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+Program 9. Write a MPI Program to demonstration of MPI_Reduce and MPI_Allreduce (MPI_MAX,
+MPI_MIN, MPI_SUM, MPI_PROD)
+#include <mpi.h>
+#include <stdio.h>
+int main(int argc, char** argv) {
+int rank, size;
+int value, max_val, min_val, sum_val, prod_val;
+int all_max_val, all_min_val, all_sum_val, all_prod_val;
+MPI_Init(&argc, &argv);
+MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+MPI_Reduce(&value, &max_val, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
+MPI_Reduce(&value, &min_val, 1, MPI_INT, MPI_MIN, 0, MPI_COMM_WORLD);
+MPI_Reduce(&value, &sum_val, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+MPI_Reduce(&value, &prod_val, 1, MPI_INT, MPI_PROD, 0, MPI_COMM_WORLD);
+if (rank == 0) {
+printf("\nMPI_Reduce results on root process (rank 0):\n");
+printf(" MAX = %d\n", max_val);
+printf(" MIN = %d\n", min_val);
+printf(" SUM = %d\n", sum_val);
+printf(" PROD = %d\n", prod_val);
+}
+MPI_Allreduce(&value, &all_max_val, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+MPI_Allreduce(&value, &all_min_val, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+MPI_Allreduce(&value, &all_sum_val, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+MPI_Allreduce(&value, &all_prod_val, 1, MPI_INT, MPI_PROD, MPI_COMM_WORLD);
+printf("\nRank %d - MPI_Allreduce results:\n", rank);
+printf(" MAX = %d\n", all_max_val);
+printf(" MIN = %d\n", all_min_val);
+printf(" SUM = %d\n", all_sum_val);
+printf(" PROD = %d\n", all_prod_val);
+MPI_Finalize();
+return 0;
+}
+
+
+
+
+
